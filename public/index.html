@@ -247,40 +247,7 @@
 </nav>
 
 <script>
-const numeroCelular = "5588998550849"; 
-const API_URL = "http://localhost:3000/produtos"; // trocar pelo domínio online depois
 
-function renderizarProdutos() {
-    const lista = document.getElementById('lista-produtos');
-
-    fetch(API_URL)
-        .then(res => res.json())
-        .then(produtos => {
-            if (!produtos || produtos.length === 0) {
-                lista.innerHTML = '<div class="empty-state">No momento, aguardamos novas peças em nosso catálogo.</div>';
-                return;
-            }
-
-            lista.innerHTML = produtos.map(p => `
-                <div class="product-card">
-                    <img src="http://localhost:3000${p.image || '/uploads/placeholder.png'}" alt="${p.name}" class="product-img">
-                    <div class="product-content">
-                        <div class="product-info">
-                            <h3>${p.name}</h3>
-                            <p>R$ ${parseFloat(p.price).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
-                        </div>
-                        <a href="https://api.whatsapp.com/send?phone=${numeroCelular}&text=Olá! Tenho interesse no item: ${p.name}" class="btn-buy">Comprar</a>
-                    </div>
-                </div>
-            `).join('');
-        })
-        .catch(err => {
-            lista.innerHTML = '<div class="empty-state">Erro ao carregar produtos.</div>';
-            console.error(err);
-        });
-}
-
-window.onload = renderizarProdutos;
 </script>
 
 </body>

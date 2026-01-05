@@ -57,18 +57,21 @@ button { background: var(--dark); color: white; border: none; cursor: pointer; }
 </div>
 
 <script>
-// URL da API
-const API_URL = "http://localhost:3000/produtos"; // trocar pelo domínio online depois
+// URL da API no Render
+const API_URL = "https://lovely-1-y45z.onrender.com/produtos"; // coloque sua URL do Render
 const SENHA = "1408";
 
 let acessoLiberado = false;
 
-// PEDIR SENHA UMA ÚNICA VEZ
+// -------------------------------
+// FUNÇÃO: Pedir senha uma única vez
+// -------------------------------
 function pedirSenha() {
   const senha = prompt("DIGITE A SENHA DO PAINEL:");
   if (senha === SENHA) {
     acessoLiberado = true;
-    document.getElementById('painel').classList.remove('hidden');
+    const painel = document.getElementById('painel');
+    if (painel) painel.classList.remove('hidden');
     render();
   } else {
     alert("Acesso negado");
@@ -76,16 +79,21 @@ function pedirSenha() {
   }
 }
 
-// ADICIONAR PRODUTO
+// -------------------------------
+// FUNÇÃO: Adicionar produto
+// -------------------------------
 function adicionar() {
   if (!acessoLiberado) return;
 
-  const name = document.getElementById('name').value;
-  const price = document.getElementById('price').value;
+  const name = document.getElementById('name').value.trim();
+  const price = document.getElementById('price').value.trim();
   const available = document.getElementById('available').value;
   const file = document.getElementById('image').files[0];
 
-  if (!name || !price || !file) { alert("Preencha todos os campos"); return; }
+  if (!name || !price || !file) { 
+    alert("Preencha todos os campos"); 
+    return; 
+  }
 
   const formData = new FormData();
   formData.append('name', name);
@@ -96,7 +104,7 @@ function adicionar() {
   fetch(API_URL, {
     method: 'POST',
     body: formData,
-    headers: { 'x-senha': SENHA }
+    headers: { 'x-senha': SENHA } // opcional, só se o server usar
   })
   .then(res => res.json())
   .then(() => {
@@ -108,11 +116,15 @@ function adicionar() {
   .catch(err => alert('Erro ao enviar produto: ' + err));
 }
 
-// RENDERIZAR PRODUTOS
+// -------------------------------
+// FUNÇÃO: Renderizar produtos
+// -------------------------------
 function render() {
   if (!acessoLiberado) return;
 
   const lista = document.getElementById('lista');
+  if (!lista) return;
+
   lista.innerHTML = 'Carregando...';
 
   fetch(API_URL)
@@ -125,9 +137,10 @@ function render() {
 
       lista.innerHTML = '';
       produtos.forEach((p, i) => {
+        const imageUrl = p.image ? `https://lovely-1-y45z.onrender.com${p.image}` : '';
         lista.innerHTML += `
           <div class="produto">
-            <img src="http://localhost:3000${p.image}">
+            <img src="${imageUrl}" alt="${p.name}">
             <div class="produto-info">
               <strong>${p.name}</strong><br>
               R$ ${p.price}<br>
@@ -143,7 +156,9 @@ function render() {
     .catch(err => lista.innerHTML = 'Erro ao carregar produtos: ' + err);
 }
 
-// REMOVER PRODUTO
+// -------------------------------
+// FUNÇÃO: Remover produto
+// -------------------------------
 function remover(i) {
   if (!acessoLiberado) return;
 
@@ -153,7 +168,9 @@ function remover(i) {
     .catch(err => alert('Erro ao remover: ' + err));
 }
 
-// ALTERAR STATUS
+// -------------------------------
+// FUNÇÃO: Alternar status do produto
+// -------------------------------
 function alternarStatus(i) {
   if (!acessoLiberado) return;
 
@@ -163,8 +180,12 @@ function alternarStatus(i) {
     .catch(err => alert('Erro ao alterar status: ' + err));
 }
 
-// CHAMAR SENHA AO ABRIR
+// -------------------------------
+// EXECUTAR ao abrir a página
+// -------------------------------
 pedirSenha();
+
+
 </script>
 
 </body>

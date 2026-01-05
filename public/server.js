@@ -66,4 +66,18 @@ app.patch('/produtos/:index', (req, res) => {
 });
 
 // Inicia o servidor
+const path = require('path');
+
+// Servir arquivos estáticos (cliente e admin)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Se a rota não for API, manda o index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 app.listen(PORT, () => console.log(`API rodando em http://localhost:${PORT}`));
