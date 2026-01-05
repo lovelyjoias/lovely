@@ -1,0 +1,13 @@
+{
+  "name": "lovely-bot",
+  "version": "1.0.0",
+  "description": "Bot para manter o site Lovely ativo no Render",
+  "main": "ping.js",
+  "type": "module",
+  "scripts": {
+    "start": "node ping.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.1"
+  }
+}
