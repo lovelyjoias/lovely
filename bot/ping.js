@@ -1,20 +1,18 @@
-import fetch from "node-fetch";
+const fetch = require('node-fetch'); // importa o fetch no Node.js
 
-const URL = "https://lovely-semi.onrender.com"; // seu site
-
-console.log("Bot iniciado, pingando site a cada 5 minutos...");
+const URL = 'https://lovely-semi.onrender.com'; // coloque o link do seu site
 
 async function ping() {
     try {
         const res = await fetch(URL);
-        console.log(`Ping enviado: ${res.status} - ${new Date().toLocaleTimeString()}`);
+        console.log(`Ping realizado com sucesso: ${res.status}`);
     } catch (err) {
-        console.error("Erro ao pingar:", err.message);
+        console.error('Erro ao pingar o site:', err);
     }
 }
 
-// Ping inicial
-ping();
+// Executa o ping a cada 5 minutos (300000 ms)
+setInterval(ping, 300000);
 
-// Ping a cada 5 minutos
-setInterval(ping, 5 * 60 * 1000);
+// Executa ping inicial
+ping();
