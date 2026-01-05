@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
 const multer = require('multer');
-const path = require('path');
+const path = require('path'); // apenas uma vez, no topo
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Porta dinâmica para Render
@@ -12,6 +12,9 @@ app.use(express.json());
 
 // Pasta de uploads acessível publicamente
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Servir arquivos estáticos (cliente e admin)
+app.use(express.static(path.join(__dirname, 'public')));
 
 const FILE = './produtos.json';
 
@@ -65,13 +68,7 @@ app.patch('/produtos/:index', (req, res) => {
   }
 });
 
-// Inicia o servidor
-const path = require('path');
-
-// Servir arquivos estáticos (cliente e admin)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Se a rota não for API, manda o index.html
+// Rotas para servir HTML
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -80,4 +77,5 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Inicia o servidor
 app.listen(PORT, () => console.log(`API rodando em http://localhost:${PORT}`));
