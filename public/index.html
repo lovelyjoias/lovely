@@ -209,46 +209,78 @@
 </head>
 <body>
 
-<header>
-    <div class="logo-main" onclick="location.reload()">Lovely</div>
-    <div class="tagline">Semijóias e Acessórios</div>
-</header>
+    <header>
+        <div class="logo-main" onclick="location.reload()">Lovely</div>
+        <div class="tagline">Semijóias e Acessórios</div>
+    </header>
 
-<div class="hero-banner">
-    <div class="hero-card">
-        <h2>Bem-vinda</h2>
-        <p>Peças exclusivas feitas para você.</p>
+    <div class="hero-banner">
+        <div class="hero-card">
+            <h2>Bem-vindo</h2>
+            <p>Peças exclusivas feitas para você.</p>
+        </div>
     </div>
-</div>
 
-<div class="section-title">Categorias</div>
-<div class="categories">
-    <a href="#catalogo" class="cat-item"><span>Anéis</span></a>
-    <a href="#catalogo" class="cat-item"><span>Colares</span></a>
-    <a href="#catalogo" class="cat-item"><span>Brincos</span></a>
-    <a href="#catalogo" class="cat-item"><span>Pulseiras</span></a>
-</div>
+    <div class="section-title">Categorias</div>
+    <div class="categories">
+        <a href="#catalogo" class="cat-item"><span>Anéis</span></a>
+        <a href="#catalogo" class="cat-item"><span>Colares</span></a>
+        <a href="#catalogo" class="cat-item"><span>Brincos</span></a>
+        <a href="#catalogo" class="cat-item"><span>Pulseiras</span></a>
+    </div>
 
-<div class="section-title" id="catalogo">Nossas Peças</div>
+    <div class="section-title" id="catalogo">Nossas Peças</div>
 
-<div class="product-strip" id="lista-produtos">
-    <div class="empty-state">Carregando catálogo...</div>
-</div>
+    <div class="product-strip" id="lista-produtos">
+        <div class="empty-state">Carregando catálogo...</div>
+    </div>
 
-<footer>
-    <p style="margin-bottom: 20px; font-size: 12px; color: var(--text-secondary);">Fale com uma consultora</p>
-    <a id="btn-whatsapp-footer" href="https://api.whatsapp.com/send?phone=5588998550849&text=Olá! Gostaria de um atendimento personalizado." class="whatsapp-btn">WhatsApp</a>
-</footer>
+    <footer>
+        <p style="margin-bottom: 20px; font-size: 12px; color: var(--text-secondary);">Fale com uma consultora</p>
+        <a id="btn-whatsapp-footer" href="https://api.whatsapp.com/send?phone=5588998550849&text=Olá! Gostaria de um atendimento personalizado." class="whatsapp-btn">WhatsApp</a>
+    </footer>
 
-<nav class="client-nav">
-    <a href="#" class="nav-link active">Início</a>
-    <a href="#catalogo" class="nav-link">Catálogo</a>
-    <a id="btn-suporte-nav" href="https://api.whatsapp.com/send?phone=5588998550849" class="nav-link">Suporte</a>
-</nav>
+    <nav class="client-nav">
+        <a href="#" class="nav-link active">Início</a>
+        <a href="#catalogo" class="nav-link">Catálogo</a>
+        <a id="btn-suporte-nav" href="https://api.whatsapp.com/send?phone=5588998550849" class="nav-link">Suporte</a>
+    </nav>
 
-<script>
+    <script>
+        const numeroCelular = "5588998550849"; 
+        const API = "/produtos"; // rota da API
 
-</script>
+        async function renderizarProdutos() {
+            const lista = document.getElementById('lista-produtos');
+            let produtos = [];
 
+            try {
+                const res = await fetch(API);
+                produtos = await res.json();
+            } catch (e) {
+                console.error("Erro ao buscar produtos:", e);
+            }
+
+            if (!produtos || produtos.length === 0) {
+                lista.innerHTML = '<div class="empty-state">No momento, aguardamos novas peças em nosso catálogo.</div>';
+                return;
+            }
+
+            lista.innerHTML = produtos.map(p => `
+                <div class="product-card">
+                    <img src="${p.image || 'https://via.placeholder.com/80'}" alt="${p.name}" class="product-img">
+                    <div class="product-content">
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <p>R$ ${parseFloat(p.price).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                        </div>
+                        <a href="https://api.whatsapp.com/send?phone=${numeroCelular}&text=Olá! Tenho interesse no item: ${p.name}" class="btn-buy">Comprar</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.onload = renderizarProdutos;
+    </script>
 </body>
 </html>

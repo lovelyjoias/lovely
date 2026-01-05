@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel Lovely</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --bg: #FCFAF7;
@@ -12,40 +14,93 @@
   --dark: #1C1C1C;
   --white: #fff;
 }
+
 * { box-sizing: border-box; }
+
 body {
   font-family: Inter, sans-serif;
   background: var(--bg);
   padding: 20px;
   color: var(--dark);
 }
-h1 { font-family: 'Playfair Display', serif; text-align: center; margin-bottom: 20px; }
-.card { background: var(--white); padding: 20px; margin-bottom: 20px; border: 1px solid #eee; }
-input, select, button { width: 100%; padding: 12px; margin-bottom: 10px; font-size: 14px; }
-button { background: var(--dark); color: white; border: none; cursor: pointer; }
-.produto { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-.produto img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
-.produto-info { flex: 1; font-size: 13px; }
-.badge { font-size: 11px; padding: 3px 6px; border-radius: 3px; }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: var(--white);
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #eee;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+button {
+  background: var(--dark);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.produto {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.produto img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.produto-info {
+  flex: 1;
+  font-size: 13px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
 .on { background: #d4f4dd; color: #1b7a3c; }
 .off { background: #f7d4d4; color: #9a1b1b; }
-.small-btn { font-size: 11px; padding: 6px; margin-top: 4px; }
-.hidden { display: none; }
+
+.small-btn {
+  font-size: 11px;
+  padding: 6px;
+  margin-top: 4px;
+}
 </style>
 </head>
+
 <body>
 
-<div id="painel" class="hidden">
 <h1>Painel Lovely</h1>
 
 <div class="card">
   <input id="name" placeholder="Nome da peça">
   <input id="price" placeholder="Preço (ex: 129)">
   <input id="image" type="file" accept="image/*">
+
   <select id="available">
     <option value="true">Disponível</option>
     <option value="false">Indisponível</option>
   </select>
+
   <button onclick="adicionar()">Adicionar peça</button>
 </div>
 
@@ -54,93 +109,81 @@ button { background: var(--dark); color: white; border: none; cursor: pointer; }
   <div id="lista"></div>
 </div>
 
-</div>
-
 <script>
-// URL da API no Render
-const API_URL = "https://lovely-1-y45z.onrender.com/produtos"; // coloque sua URL do Render
+const API_URL = "/produtos";
 const SENHA = "1408";
-
 let acessoLiberado = false;
 
-// -------------------------------
-// FUNÇÃO: Pedir senha uma única vez
-// -------------------------------
-function pedirSenha() {
+// ===== SENHA =====
+(function pedirSenha() {
   const senha = prompt("DIGITE A SENHA DO PAINEL:");
   if (senha === SENHA) {
     acessoLiberado = true;
-    const painel = document.getElementById('painel');
-    if (painel) painel.classList.remove('hidden');
     render();
   } else {
     alert("Acesso negado");
     window.location.href = "/";
   }
-}
+})();
 
-// -------------------------------
-// FUNÇÃO: Adicionar produto
-// -------------------------------
+// ===== ADICIONAR =====
 function adicionar() {
   if (!acessoLiberado) return;
 
-  const name = document.getElementById('name').value.trim();
-  const price = document.getElementById('price').value.trim();
+  const name = document.getElementById('name').value;
+  const price = document.getElementById('price').value;
   const available = document.getElementById('available').value;
   const file = document.getElementById('image').files[0];
 
-  if (!name || !price || !file) { 
-    alert("Preencha todos os campos"); 
-    return; 
+  if (!name || !price || !file) {
+    alert("Preencha todos os campos");
+    return;
   }
 
   const formData = new FormData();
-  formData.append('name', name);
-  formData.append('price', price);
-  formData.append('available', available);
-  formData.append('image', file);
+  formData.append("name", name);
+  formData.append("price", price);
+  formData.append("available", available);
+  formData.append("image", file);
 
   fetch(API_URL, {
-    method: 'POST',
-    body: formData,
-    headers: { 'x-senha': SENHA } // opcional, só se o server usar
+    method: "POST",
+    body: formData
   })
-  .then(res => res.json())
   .then(() => {
     document.getElementById('name').value = '';
     document.getElementById('price').value = '';
     document.getElementById('image').value = '';
     render();
-  })
-  .catch(err => alert('Erro ao enviar produto: ' + err));
+  });
 }
 
-// -------------------------------
-// FUNÇÃO: Renderizar produtos
-// -------------------------------
+// ===== REMOVER =====
+function remover(i) {
+  fetch(`${API_URL}/${i}`, { method: "DELETE" })
+    .then(() => render());
+}
+
+// ===== ALTERAR STATUS =====
+function alternarStatus(i) {
+  fetch(`${API_URL}/${i}`, { method: "PATCH" })
+    .then(() => render());
+}
+
+// ===== RENDER =====
 function render() {
   if (!acessoLiberado) return;
-
-  const lista = document.getElementById('lista');
-  if (!lista) return;
-
-  lista.innerHTML = 'Carregando...';
 
   fetch(API_URL)
     .then(res => res.json())
     .then(produtos => {
-      if (!produtos || produtos.length === 0) {
-        lista.innerHTML = '<p>Nenhum produto cadastrado.</p>';
-        return;
-      }
-
+      const lista = document.getElementById('lista');
       lista.innerHTML = '';
+
       produtos.forEach((p, i) => {
-        const imageUrl = p.image ? `https://lovely-1-y45z.onrender.com${p.image}` : '';
         lista.innerHTML += `
           <div class="produto">
-            <img src="${imageUrl}" alt="${p.name}">
+            ${p.image ? `<img src="${p.image}">` : ''}
             <div class="produto-info">
               <strong>${p.name}</strong><br>
               R$ ${p.price}<br>
@@ -150,42 +193,11 @@ function render() {
               <button class="small-btn" onclick="alternarStatus(${i})">Alterar status</button>
               <button class="small-btn" onclick="remover(${i})">Remover</button>
             </div>
-          </div>`;
+          </div>
+        `;
       });
-    })
-    .catch(err => lista.innerHTML = 'Erro ao carregar produtos: ' + err);
+    });
 }
-
-// -------------------------------
-// FUNÇÃO: Remover produto
-// -------------------------------
-function remover(i) {
-  if (!acessoLiberado) return;
-
-  fetch(`${API_URL}/${i}`, { method: 'DELETE', headers: { 'x-senha': SENHA } })
-    .then(res => res.json())
-    .then(() => render())
-    .catch(err => alert('Erro ao remover: ' + err));
-}
-
-// -------------------------------
-// FUNÇÃO: Alternar status do produto
-// -------------------------------
-function alternarStatus(i) {
-  if (!acessoLiberado) return;
-
-  fetch(`${API_URL}/${i}`, { method: 'PATCH', headers: { 'x-senha': SENHA } })
-    .then(res => res.json())
-    .then(() => render())
-    .catch(err => alert('Erro ao alterar status: ' + err));
-}
-
-// -------------------------------
-// EXECUTAR ao abrir a página
-// -------------------------------
-pedirSenha();
-
-
 </script>
 
 </body>
