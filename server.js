@@ -5,28 +5,30 @@ const multer = require('multer');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Porta dinâmica para Render
 
 app.use(cors());
 app.use(express.json());
+
+// Pasta de uploads acessível publicamente
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const FILE = './produtos.json';
 
-// Upload de imagens
+// Configuração do multer para upload de imagens
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
 const upload = multer({ storage });
 
-// GET todos produtos
+// GET: retorna todos os produtos
 app.get('/produtos', (req, res) => {
   const data = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE)) : [];
   res.json(data);
 });
 
-// POST adicionar produto
+// POST: adiciona um novo produto
 app.post('/produtos', upload.single('image'), (req, res) => {
   const data = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE)) : [];
   const { name, price, available } = req.body;
@@ -37,7 +39,7 @@ app.post('/produtos', upload.single('image'), (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// DELETE produto por índice
+// DELETE: remove produto por índice
 app.delete('/produtos/:index', (req, res) => {
   const data = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE)) : [];
   const idx = parseInt(req.params.index);
@@ -50,7 +52,7 @@ app.delete('/produtos/:index', (req, res) => {
   }
 });
 
-// PATCH alterar status
+// PATCH: alterna status de disponibilidade
 app.patch('/produtos/:index', (req, res) => {
   const data = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE)) : [];
   const idx = parseInt(req.params.index);
@@ -63,4 +65,5 @@ app.patch('/produtos/:index', (req, res) => {
   }
 });
 
+// Inicia o servidor
 app.listen(PORT, () => console.log(`API rodando em http://localhost:${PORT}`));
