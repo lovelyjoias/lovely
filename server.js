@@ -1,81 +1,55 @@
-const express = require('express');
-const fs = require('fs');
-const cors = require('cors');
-const multer = require('multer');
-const path = require('path'); // apenas uma vez, no topo
+require('dotenv').config()
+const express = require('express')
+const mongoose = require('mongoose')
+const cors = require('cors')
+const path = require('path')
 
-const app = express();
-const PORT = process.env.PORT || 3000; // Porta dinâmica para Render
+const app = express()
 
-app.use(cors());
-app.use(express.json());
+app.use(cors())
+app.use(express.json())
+app.use(express.static('public'))
 
-// Pasta de uploads acessível publicamente
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// 🔌 MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB conectado'))
+  .catch(err => console.error(err))
 
-// Servir arquivos estáticos (cliente e admin)
-app.use(express.static(path.join(__dirname, 'public')));
+// 📦 Schema Produto
+const ProductSchema = new mongoose.Schema({
+  name: String,
+  price: Number,
+  image: String,
+  description: String
+})
 
-const FILE = './produtos.json';
+const Product = mongoose.model('Product', ProductSchema)
 
-// Configuração do multer para upload de imagens
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-});
-const upload = multer({ storage });
-
-// GET: retorna todos os produtos
-app.get('/produtos', (req, res) => {
-  const data = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE)) : [];
-  res.json(data);
-});
-
-// POST: adiciona um novo produto
-app.post('/produtos', upload.single('image'), (req, res) => {
-  const data = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE)) : [];
-  const { name, price, available } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : '';
-
-  data.push({ name, price, available: available === 'true', image });
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-  res.json({ status: 'ok' });
-});
-
-// DELETE: remove produto por índice
-app.delete('/produtos/:index', (req, res) => {
-  const data = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE)) : [];
-  const idx = parseInt(req.params.index);
-  if (!isNaN(idx) && data[idx]) {
-    data.splice(idx, 1);
-    fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-    res.json({ status: 'ok' });
-  } else {
-    res.status(400).json({ error: 'Produto não encontrado' });
+// ➕ Criar produto (ADMIN)
+app.post('/api/products', async (req, res) => {
+  try {
+    const product = await Product.create(req.body)
+    res.json(product)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
   }
-});
+})
 
-// PATCH: alterna status de disponibilidade
-app.patch('/produtos/:index', (req, res) => {
-  const data = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE)) : [];
-  const idx = parseInt(req.params.index);
-  if (!isNaN(idx) && data[idx]) {
-    data[idx].available = !data[idx].available;
-    fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-    res.json({ status: 'ok' });
-  } else {
-    res.status(400).json({ error: 'Produto não encontrado' });
-  }
-});
+// 📥 Listar produtos (SITE)
+app.get('/api/products', async (req, res) => {
+  const products = await Product.find()
+  res.json(products)
+})
 
-// Rotas para servir HTML
+// 🌐 Rotas HTML
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+  res.sendFile(path.join(__dirname, 'public/index.html'))
+})
 
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
+  res.sendFile(path.join(__dirname, 'public/admin.html'))
+})
 
-// Inicia o servidor
-app.listen(PORT, () => console.log(`API rodando em http://localhost:${PORT}`));
+// 🚀 Start
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => console.log('Servidor rodando na porta', PORT))
