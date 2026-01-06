@@ -97,6 +97,11 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Endpoint ping
+app.get('/ping', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
+});
+
 // ===== START =====
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
